@@ -39,6 +39,94 @@ def get_prices_bulk(tickers: tuple[str, ...]) -> dict[str, float]:
     return out
 
 
+@st.cache_data(ttl=PRICE_CACHE_TTL, show_spinner="Fetching live quotes…")
+def get_quotes_bulk(tickers: tuple[str, ...]) -> dict[str, dict]:
+    """Batched quotes for the Market Explorer.
+
+    One yf.download call → {ticker: {price, prev_close, change, change_pct, volume}}.
+    Tickers that fail to resolve are silently skipped.
+    """
+    if not tickers:
+        return {}
+    try:
+        data = yf.download(
+            list(tickers),
+            period="2d",
+            progress=False,
+            auto_adjust=False,
+            group_by="ticker",
+            threads=True,
+        )
+    except Exception:
+        return {}
+    if data is None or data.empty:
+        return {}
+
+    out: dict[str, dict] = {}
+    # yfinance returns a flat DataFrame for one ticker and a MultiIndex for many.
+    if len(tickers) == 1:
+        ticker = tickers[0]
+        quote = _extract_quote(data)
+        if quote:
+            out[ticker] = quote
+        return out
+
+    for ticker in tickers:
+        try:
+            sub = data[ticker]
+        except KeyError:
+            continue
+        quote = _extract_quote(sub)
+        if quote:
+            out[ticker] = quote
+    return out
+
+
+def _extract_quote(df: pd.DataFrame) -> Optional[dict]:
+    """Pull the latest two closes + latest volume from a per-ticker frame."""
+    if df is None or df.empty or "Close" not in df:
+        return None
+    closes = df["Close"].dropna()
+    if len(closes) < 2:
+        # Fall back to single-day quote (change unknown).
+        if len(closes) == 1:
+            price = float(closes.iloc[-1])
+            volume = float(df["Volume"].dropna().iloc[-1]) if "Volume" in df and not df["Volume"].dropna().empty else 0.0
+            return {
+                "price": price,
+                "prev_close": price,
+                "change": 0.0,
+                "change_pct": 0.0,
+                "volume": volume,
+            }
+        return None
+    price = float(closes.iloc[-1])
+    prev = float(closes.iloc[-2])
+    change = price - prev
+    change_pct = (change / prev * 100) if prev else 0.0
+    volume = float(df["Volume"].dropna().iloc[-1]) if "Volume" in df and not df["Volume"].dropna().empty else 0.0
+    return {
+        "price": price,
+        "prev_close": prev,
+        "change": change,
+        "change_pct": change_pct,
+        "volume": volume,
+    }
+
+
+@st.cache_data(ttl=HISTORY_CACHE_TTL, show_spinner=False)
+def get_ticker_info(ticker: str) -> dict:
+    """Return the yfinance .info dict for a ticker, or {} on failure.
+
+    Used by the Market Explorer detail panel for market cap and 52-week range.
+    """
+    try:
+        info = yf.Ticker(ticker.upper().strip()).info
+        return info or {}
+    except Exception:
+        return {}
+
+
 @st.cache_data(ttl=HISTORY_CACHE_TTL, show_spinner=False)
 def get_history(ticker: str, period: str = "6mo") -> pd.DataFrame:
     """Return historical OHLCV. Empty DataFrame on failure."""

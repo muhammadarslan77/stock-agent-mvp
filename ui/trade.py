@@ -6,6 +6,7 @@ AND again on submit. Phase 5 will reuse the same `prefill_ticker` /
 """
 import streamlit as st
 
+from config import POPULAR_TICKERS
 from services.market_data import get_price
 from services.portfolio import (
     PortfolioError,
@@ -44,11 +45,31 @@ def render() -> None:
 
 
 def _buy_panel(prefill_ticker: str, prefill_qty: int) -> None:
+    OTHER = "Other…"
+    options = sorted(set(POPULAR_TICKERS))
+    prefill = prefill_ticker.upper().strip()
+    # Preselect the prefill if it's in the shortlist; otherwise route to "Other…".
+    if prefill and prefill in options:
+        default_idx = options.index(prefill)
+    elif prefill:
+        default_idx = len(options)  # "Other…"
+    else:
+        default_idx = options.index("AAPL") if "AAPL" in options else 0
+
     col1, col2 = st.columns([2, 1])
     with col1:
-        ticker = st.text_input(
-            "Ticker", value=prefill_ticker, placeholder="AAPL", key="buy_ticker"
-        ).upper().strip()
+        choice = st.selectbox(
+            "Ticker", options + [OTHER], index=default_idx, key="buy_choice"
+        )
+        if choice == OTHER:
+            ticker = st.text_input(
+                "Enter ticker symbol",
+                value=prefill if prefill not in options else "",
+                placeholder="e.g. BRK-B",
+                key="buy_ticker_other",
+            ).upper().strip()
+        else:
+            ticker = choice
     with col2:
         quantity = st.number_input(
             "Quantity", min_value=1, step=1, value=int(prefill_qty), key="buy_qty"

@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import streamlit, yfinance, pandas, plotly; print\\('all imports OK'\\)\")",
+      "Bash(pip install *)",
+      "Bash(pip --version)",
+      "Bash(python -m pip install -r requirements.txt --quiet)",
+      "Bash(python -m streamlit run app.py --server.headless=true --server.port=8765)",
+      "Bash(echo \"started, pid=$!\")",
+      "Bash(curl -sf http://localhost:8765/_stcore/health)",
+      "Bash(curl -s http://localhost:8765/_stcore/health)",
+      "Bash(curl -s \"http://localhost:8765/market\" -o /tmp/market.html -w \"HTTP %{http_code}\\\\n\")"
+    ]
+  }
+}
