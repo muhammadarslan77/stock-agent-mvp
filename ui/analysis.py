@@ -12,7 +12,7 @@ from utils.formatters import money, percent, signed_money
 
 def render() -> None:
     st.title("🔬 Stock Analysis")
-    st.caption("Quick technical snapshot. For AI-powered BUY / SELL / HOLD calls, open the **Recommendations** page.")
+    st.caption("For BUY / SELL / HOLD assistance provided by AI , open the **Recommendations** page.")
 
     prefill = st.session_state.pop("prefill_analyze_ticker", "")
     ticker = st.text_input(
@@ -23,7 +23,7 @@ def render() -> None:
     ).upper().strip()
 
     if not ticker:
-        st.info("Enter a ticker — or open the **Market Explorer** and click **Analyze** on any stock.")
+        st.info("Enter a ticker above or open the **Market Explorer** and click **Analyze** on any stock.")
         return
 
     price = get_price(ticker)
@@ -68,7 +68,7 @@ def render() -> None:
 
     st.divider()
     if st.button(
-        "🤖 Get AI Recommendation",
+        "Get AI Recommendation",
         type="primary",
         use_container_width=True,
         key="analysis_to_recs",

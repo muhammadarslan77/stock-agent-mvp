@@ -41,7 +41,7 @@ def render() -> None:
 
     if pending_rec_id and pending_rec_action in ("BUY", "SELL"):
         st.info(
-            f"📨 Linked to AI recommendation **#{pending_rec_id}** "
+            f"Linked to AI recommendation **#{pending_rec_id}** "
             f"({pending_rec_action} {prefill_ticker or '—'})."
         )
 
@@ -98,8 +98,8 @@ def _buy_panel(prefill_ticker: str, prefill_qty: int,
         st.error(f"Could not find price for '{ticker}'.")
     elif price is not None:
         st.info(
-            f"Current price: **{money(price)}**  ·  "
-            f"Estimated total: **{money(price * quantity)}**"
+            f"Current Price: :blue[**{money(price)}**]      \n"
+            f"Estimated Total: :blue[**{money(price * quantity)}**]"
         )
         preview_reason = risk_check_buy(ticker, int(quantity), price)
         if preview_reason:
@@ -145,8 +145,8 @@ def _sell_panel(linked_rec_id: int | None = None) -> None:
         st.error(f"Could not fetch price for '{ticker}'.")
     else:
         st.info(
-            f"Current price: **{money(price)}**  ·  "
-            f"Estimated proceeds: **{money(price * quantity)}**"
+            f"Current Price: :blue[**{money(price)}**]     \n"
+            f"Estimated Proceeds: :blue[**{money(price * quantity)}**]"
         )
         preview_reason = risk_check_sell(ticker, int(quantity))
         if preview_reason:
@@ -180,10 +180,10 @@ def _transactions_table() -> None:
     st.dataframe(
         [
             {
-                "When": r["timestamp"].replace("T", " "),
+                "Date & Time": r["timestamp"].replace("T", " "),
                 "Action": r["action"],
                 "Ticker": r["ticker"],
-                "Qty": r["quantity"],
+                "Quantity": r["quantity"],
                 "Price": money(r["price"]),
                 "Total": money(r["total"]),
             }

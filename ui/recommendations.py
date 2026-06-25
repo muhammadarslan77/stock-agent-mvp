@@ -36,8 +36,7 @@ def render() -> None:
     st.title("🤖 AI Recommendations")
     st.caption(
         "The agent reads your portfolio, risk profile, and recent market "
-        "indicators, then suggests up to 3 trades. Past recommendations are "
-        "fed back so the AI can learn from how its prior calls played out."
+        "indicators, then suggests up to 3 trades."
     )
 
     if not profile_exists():
@@ -46,8 +45,7 @@ def render() -> None:
 
     if not os.environ.get("GROQ_API_KEY"):
         st.error(
-            "🔑 **GROQ_API_KEY is not set.** Copy `.env.example` to `.env` "
-            "and add your Groq API key, then restart the app."
+            "🔑 **GROQ_API_KEY is not set.**"
         )
         return
 
@@ -55,7 +53,7 @@ def render() -> None:
 
     st.divider()
 
-    tab_pending, tab_history = st.tabs(["📥 Pending", "📚 History"])
+    tab_pending, tab_history = st.tabs([" Pending", " History"])
     with tab_pending:
         _render_pending()
     with tab_history:
@@ -69,15 +67,14 @@ def _render_generate_button() -> None:
     col_btn, col_info = st.columns([1, 3])
     with col_btn:
         clicked = st.button(
-            "✨ Generate New Recommendations",
+            "Generate New Recommendations",
             type="primary",
             use_container_width=True,
             key="generate_recs_btn",
         )
     with col_info:
         st.caption(
-            "Calls Groq `llama-3.3-70b-versatile`. Suggestions are saved to "
-            "your history and appear in the **Pending** tab below."
+            " "
         )
 
     if clicked:
@@ -115,7 +112,7 @@ def _render_rec_card(rec: dict) -> None:
             st.markdown(
                 f"### {emoji} **{action}** · {ticker}"
             )
-            st.caption(f"🕒 {_format_timestamp(rec['timestamp'])}")
+            st.caption(f"{_format_timestamp(rec['timestamp'])}")
         with head_r:
             st.markdown(
                 f"<div style='text-align:right;'>"
@@ -134,7 +131,7 @@ def _render_rec_card(rec: dict) -> None:
 
         st.warning(f"⚠️ **Risk:** {rec['risk_note']}")
 
-        with st.expander("🧠 Why this recommendation?"):
+        with st.expander("Why this recommendation?"):
             st.write(rec["reasoning"])
 
         # Action buttons

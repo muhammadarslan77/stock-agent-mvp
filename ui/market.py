@@ -34,8 +34,7 @@ def _load_companies() -> pd.DataFrame:
 def render() -> None:
     st.title("🌐 Market Explorer")
     st.caption(
-        "Browse popular US stocks and ETFs · live quotes · one-click trade. "
-        "Quotes are cached for 5 minutes."
+        "Browse popular US stocks and ETFs · Live Quotes · One-Click Trade. "
     )
 
     companies = _load_companies()
@@ -44,18 +43,18 @@ def render() -> None:
     f1, f2, f3, f4 = st.columns([3, 2, 2, 1])
     with f1:
         search = st.text_input(
-            "🔎 Search",
+            "🔎 **Search**",
             placeholder="Ticker or company name",
             key="market_search",
         ).lower().strip()
     with f2:
         sectors = ["All sectors"] + sorted(companies["sector"].unique().tolist())
-        sector_filter = st.selectbox("Sector", sectors, key="market_sector")
+        sector_filter = st.selectbox("**Sector**", sectors, key="market_sector")
     with f3:
-        sort_choice = st.selectbox("Sort by", list(SORT_OPTIONS.keys()), key="market_sort")
+        sort_choice = st.selectbox("**Sort by**", list(SORT_OPTIONS.keys()), key="market_sort")
     with f4:
         st.write("")  # spacer to align with selectbox labels
-        if st.button("🔄 Refresh", use_container_width=True, key="market_refresh"):
+        if st.button("🔄 **Refresh**", use_container_width=True, key="market_refresh"):
             get_quotes_bulk.clear()
             st.rerun()
 
@@ -123,7 +122,7 @@ def render() -> None:
 
     selected_rows = selection.selection.rows if hasattr(selection, "selection") else []
     if not selected_rows:
-        st.info("👆 Select a row above to view the stock detail panel.")
+        st.info("Select a row above to view the stock detail panel.")
         return
 
     _render_detail_panel(df.iloc[selected_rows[0]])
