@@ -1,8 +1,10 @@
 """Trade page: buy / sell at live market prices, plus transaction history.
 
 Risk checks (concentration cap, cash, share count) run inline as warnings
-AND again on submit. Phase 5 will reuse the same `prefill_ticker` /
-`prefill_qty` session-state hook from the AI recommendation Accept button.
+AND again on submit. The AI Recommendations page hands accepted picks
+off here via `prefill_ticker`, `prefill_qty`, and `pending_rec_id` —
+the latter is forwarded to `portfolio.buy()` / `sell()` so the resulting
+transaction is linked back to the recommendation row.
 """
 import streamlit as st
 
@@ -32,19 +34,34 @@ def render() -> None:
 
     prefill_ticker = st.session_state.pop("prefill_ticker", "")
     prefill_qty = st.session_state.pop("prefill_qty", 1)
+    pending_rec_id = st.session_state.pop("pending_rec_id", None)
+    pending_rec_action = st.session_state.pop("pending_rec_action", None)
 
     st.metric("Available cash", money(get_cash_balance()))
 
+    if pending_rec_id and pending_rec_action in ("BUY", "SELL"):
+        st.info(
+            f"📨 Linked to AI recommendation **#{pending_rec_id}** "
+            f"({pending_rec_action} {prefill_ticker or '—'})."
+        )
+
     tab_buy, tab_sell, tab_hist = st.tabs(["Buy", "Sell", "Transactions"])
     with tab_buy:
-        _buy_panel(prefill_ticker, prefill_qty)
+        _buy_panel(
+            prefill_ticker,
+            prefill_qty,
+            pending_rec_id if pending_rec_action == "BUY" else None,
+        )
     with tab_sell:
-        _sell_panel()
+        _sell_panel(
+            pending_rec_id if pending_rec_action == "SELL" else None,
+        )
     with tab_hist:
         _transactions_table()
 
 
-def _buy_panel(prefill_ticker: str, prefill_qty: int) -> None:
+def _buy_panel(prefill_ticker: str, prefill_qty: int,
+               linked_rec_id: int | None = None) -> None:
     OTHER = "Other…"
     options = sorted(set(POPULAR_TICKERS))
     prefill = prefill_ticker.upper().strip()
@@ -97,7 +114,8 @@ def _buy_panel(prefill_ticker: str, prefill_qty: int) -> None:
             st.error(reason)
             return
         try:
-            result = buy(ticker, int(quantity))
+            result = buy(ticker, int(quantity),
+                         linked_recommendation_id=linked_rec_id)
             st.success(
                 f"Bought {result['quantity']} × {result['ticker']} "
                 f"@ {money(result['price'])} = {money(result['total'])}"
@@ -107,7 +125,7 @@ def _buy_panel(prefill_ticker: str, prefill_qty: int) -> None:
             st.error(str(e))
 
 
-def _sell_panel() -> None:
+def _sell_panel(linked_rec_id: int | None = None) -> None:
     holdings = get_holdings()
     if not holdings:
         st.info("You don't own any stocks yet.")
@@ -143,7 +161,8 @@ def _sell_panel() -> None:
             st.error(reason)
             return
         try:
-            result = sell(ticker, int(quantity))
+            result = sell(ticker, int(quantity),
+                          linked_recommendation_id=linked_rec_id)
             st.success(
                 f"Sold {result['quantity']} × {result['ticker']} "
                 f"@ {money(result['price'])} = {money(result['total'])}"

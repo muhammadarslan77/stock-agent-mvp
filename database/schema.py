@@ -51,6 +51,8 @@ CREATE TABLE IF NOT EXISTS portfolio_snapshots (
     holdings_value  REAL    NOT NULL,
     total_value     REAL    NOT NULL
 );
+
+CREATE INDEX IF NOT EXISTS idx_recs_timestamp ON recommendations(timestamp DESC);
 """
 
 

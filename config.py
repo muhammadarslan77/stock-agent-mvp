@@ -4,12 +4,14 @@ All shared constants live here so other modules never hardcode paths,
 model names, or risk thresholds.
 """
 from pathlib import Path
+from dotenv import load_dotenv
 
+load_dotenv()
+
+GROQ_MODEL = "llama-3.3-70b-versatile"
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
 DB_PATH = DATA_DIR / "portfolio.db"
-
-OPENAI_MODEL = "gpt-4o-mini"
 
 # Maximum share of total portfolio value any single stock may occupy,
 # enforced by services/risk.py (wired up in Phase 3).

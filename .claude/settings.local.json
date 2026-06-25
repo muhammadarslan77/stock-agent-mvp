@@ -9,7 +9,10 @@
       "Bash(echo \"started, pid=$!\")",
       "Bash(curl -sf http://localhost:8765/_stcore/health)",
       "Bash(curl -s http://localhost:8765/_stcore/health)",
-      "Bash(curl -s \"http://localhost:8765/market\" -o /tmp/market.html -w \"HTTP %{http_code}\\\\n\")"
+      "Bash(curl -s \"http://localhost:8765/market\" -o /tmp/market.html -w \"HTTP %{http_code}\\\\n\")",
+      "Bash(python -c ' *)",
+      "Bash(python _smoke.py)",
+      "Bash(rm -f _smoke.py)"
     ]
   }
 }

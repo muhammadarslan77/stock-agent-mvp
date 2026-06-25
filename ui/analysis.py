@@ -1,4 +1,4 @@
-"""Stock Analysis page — basic price view today, AI recommendations in Phase 5.
+"""Stock Analysis page — technical snapshot and a jump-off to AI recommendations.
 
 Reads `prefill_analyze_ticker` from session state so the Market Explorer's
 Analyze button can hand off the selected ticker.
@@ -12,7 +12,7 @@ from utils.formatters import money, percent, signed_money
 
 def render() -> None:
     st.title("🔬 Stock Analysis")
-    st.caption("Quick technical snapshot. Full AI-powered recommendations land in Phase 5.")
+    st.caption("Quick technical snapshot. For AI-powered BUY / SELL / HOLD calls, open the **Recommendations** page.")
 
     prefill = st.session_state.pop("prefill_analyze_ticker", "")
     ticker = st.text_input(
@@ -67,7 +67,11 @@ def render() -> None:
         st.plotly_chart(price_history_line(hist), use_container_width=True)
 
     st.divider()
-    st.info(
-        "🤖 **Coming in Phase 5:** AI agent will read this chart, your portfolio, "
-        "and your risk profile to recommend BUY / SELL / HOLD with reasoning."
-    )
+    if st.button(
+        "🤖 Get AI Recommendation",
+        type="primary",
+        use_container_width=True,
+        key="analysis_to_recs",
+    ):
+        from ui.pages import recommendations_page  # lazy import to avoid cycle
+        st.switch_page(recommendations_page)

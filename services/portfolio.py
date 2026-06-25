@@ -52,7 +52,7 @@ def get_holdings() -> list[dict]:
                 SUM(CASE WHEN action='BUY' THEN quantity ELSE 0          END) AS buy_qty
             FROM transactions
             GROUP BY ticker
-            HAVING quantity > 0
+            HAVING SUM(CASE WHEN action='BUY' THEN quantity ELSE -quantity END) > 0
             """
         ).fetchall()
         holdings = []

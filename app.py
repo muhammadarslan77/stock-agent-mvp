@@ -26,11 +26,12 @@ from ui.pages import (  # noqa: E402
     dashboard_page,
     market_page,
     profile_page,
+    recommendations_page,
     trade_page,
 )
 
 nav = st.navigation({
     "Overview": [dashboard_page, market_page],
-    "Manage": [trade_page, analysis_page, profile_page],
+    "Manage": [trade_page, analysis_page, recommendations_page, profile_page],
 })
 nav.run()
